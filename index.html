@@ -175,6 +175,125 @@ public class HelloJNI {
 </code></pre>
                             </section>
 
+                            <!-- Tool Evaluation Section -->
+<section id="evaluation-section" class="doc-section">
+    <h2 class="section-title">Tool Evaluation Study</h2>
+
+    <div class="section-block">
+        <h3>Participant Information</h3>
+        <p>
+            Thank you for helping us evaluate CrossLink. This study aims to understand
+            how developers comprehend and debug JNI-based cross-language systems,
+            both with and without tool support.
+        </p>
+    </div>
+
+    <div class="section-block">
+        <h3>What is JNI?</h3>
+        <p>
+            The Java Native Interface (JNI) is a programming framework that allows Java
+            code running in the JVM to call and be called by native applications written
+            in C or C++. It acts as a bridge between two different programming languages.
+        </p>
+        <p>
+            Developers use JNI for performance optimization, reusing legacy C/C++ libraries,
+            and accessing system-level or hardware-specific features not directly available in Java.
+        </p>
+    </div>
+
+    <div class="section-block">
+        <h3>How JNI Works</h3>
+        <p><strong>Java Declaration:</strong></p>
+<pre><code>
+public native int getBufferImpl(int size);
+</code></pre>
+
+        <p><strong>C++ Implementation Naming Convention:</strong></p>
+<pre><code>
+JNIEXPORT jint JNICALL
+Java_package_ClassName_getBufferImpl
+  (JNIEnv *env, jobject obj, jint size)
+{
+    // C++ implementation
+}
+</code></pre>
+
+        <p>
+            The naming format follows:
+            <strong>Java_PackageName_ClassName_MethodName</strong>.
+            Any mismatch in naming or parameters can break the link.
+        </p>
+    </div>
+
+    <div class="section-block">
+        <h3>Rationale for Tasks</h3>
+        <p>
+            JNI links can break due to refactoring, typos, parameter mismatches,
+            or merge conflicts. Without tooling, developers must:
+        </p>
+        <ol>
+            <li>Read the Java native method</li>
+            <li>Guess the C++ function name</li>
+            <li>Search the entire C++ codebase</li>
+            <li>Locate the correct file</li>
+            <li>Verify parameter matching</li>
+        </ol>
+        <p>
+            This manual context switching between Java and C++ is mentally taxing.
+            CrossLink simplifies this process into interactive navigation and
+            visual verification.
+        </p>
+    </div>
+
+    <div class="section-block">
+        <h3>Evaluation Tasks</h3>
+
+        <h4>Without Tool</h4>
+        <p><strong>Task 1:</strong> Fix a Broken JNI Link</p>
+        <p>
+            Identify and fix the broken native method linkage
+            in <code>VolumeDataPageAccessor.java</code>.
+        </p>
+
+        <p><strong>Task 2:</strong> Fix a Parameter Mismatch</p>
+        <p>
+            Identify and resolve the parameter mismatch
+            in <code>VolumeDataPage.java</code>.
+        </p>
+
+        <hr>
+
+        <h4>With CrossLink</h4>
+        <p><strong>Task 1:</strong> Fix a Broken JNI Link</p>
+        <p>
+            Identify and fix the JNI linkage issue
+            in <code>VDS.java</code>.
+        </p>
+
+        <p><strong>Task 2:</strong> Fix a Parameter Mismatch</p>
+        <p>
+            Identify and resolve the error
+            in <code>VDSError.java</code>.
+        </p>
+    </div>
+
+    <div class="section-block">
+        <h3>Feedback Form</h3>
+        <p>
+            Participants complete a Google Form including:
+        </p>
+        <ul>
+            <li>Task difficulty rating (with and without tool)</li>
+            <li>Confidence level rating</li>
+            <li>Frustration level rating</li>
+            <li>Most time-consuming activity</li>
+            <li>Most helpful CrossLink feature</li>
+            <li>Time spent searching vs fixing</li>
+        </ul>
+    </div>
+
+</section>
+
                             <!-- Demo -->
                             <section id="video-section" class="doc-section">
                                 <h2 class="section-title">Video Demonstration</h2>
@@ -199,6 +318,7 @@ public class HelloJNI {
                                 <a class="nav-link scrollto" href="#architecture-section">Requirements</a>
                                 <a class="nav-link scrollto" href="#function-workflow-section">Getting Started</a>
                                 <a class="nav-link scrollto" href="#feature-section">Example</a>
+                                <a class="nav-link scrollto" href="#evaluation-section">Tool Evaluation</a>
                                 <a class="nav-link scrollto" href="#video-section">Demo</a>
                             </nav>
                         </div>
