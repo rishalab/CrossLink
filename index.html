@@ -19,6 +19,9 @@
     <link rel="stylesheet" href="assets/plugins/prism/prism.css">
     <link rel="stylesheet" href="assets/plugins/elegant_font/css/style.css">
     <link id="theme-style" rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 </head>
 
 <body class="body-green">
@@ -43,7 +46,7 @@
 
                 <div id="doc-header" class="doc-header text-center">
                     <h1 class="doc-title"><i class="icon fa fa-paper-plane"></i> Quick Start</h1>
-                    <div class="meta"><i class="far fa-clock"></i> Last updated: 2026</div>
+                    <div class="meta"><i class="far fa-clock"></i> Last updated:01/03/2026</div>
                 </div>
 
                 <div class="doc-body row">
@@ -65,9 +68,10 @@
                                         and maintains link integrity to ensure that refactoring in one
                                         language does not break bindings in the other.
                                         <br><br>
-                                        The tool provides real-time highlighting, dependency visualization,
-                                        automated integrity maintenance, and intelligent constant analysis
-                                        for JNI-based projects.
+                                        Maintaining large codebases that utilize JNI is challenging because 
+                                        standard IDEs often fail to track dependencies across the language barrier. 
+                                        CrossLink solves this by providing real-time analysis, dependency graphing, 
+                                        and automated refactoring support.
                                     </p>
                                 </div>
                             </section>
@@ -88,60 +92,110 @@
                                         <li><strong>Input Layer:</strong> File Watcher monitors Java and C/C++ source files for real-time changes.</li>
                                         <li><strong>Core Service Layer:</strong>
                                             <ul>
-                                                <li>Constant Analyzer</li>
-                                                <li>Dependency Analyzer</li>
-                                                <li>Persistent JNI Index</li>
-                                                <li>Integrity Maintainer</li>
+                                                <li><b>Constant Analyzer:</b> Tracks shared constants between Java and Native code.</li>
+                                                <li><b>Dependency Analyzer:</b> Maps the relationships between Java classes and C++ headers/implementations.</li>
+                                                <li><b>JNI Index:</b> A central database storing the mapping of all links.</li>
+                                                <li><b>Integrity Maintainer:</b> Ensures that moves or renames do not result in broken links.</li>
                                             </ul>
                                         </li>
-                                        <li><strong>Presentation Layer:</strong>
+                                        <li><strong>Presentation Layer:</strong> Provides actionable insights including:
                                             <ul>
-                                                <li>Dependency Graph Visualization</li>
-                                                <li>JNI Link Reports</li>
-                                                <li>Live Syntax Highlighting</li>
-                                                <li>Interactive Dashboard</li>
+                                                <li><b>Dependency Graph Visualization</b></li>
+                                                <li><b>JNI Link Reports</b></li>
+                                                <li><b>Live Syntax Highlighting</b></li>
+                                                <li><b>Constant Analysis Report</b></li>
                                             </ul>
                                         </li>
                                     </ul>
                                 </div>
                             </section>
 
+
+                            <section id="JNI-Index" class="doc-section">
+                                <h2 class="section-title">JNI Indexing and Performance</h2>
+                                <div class="section-block">
+                                    <p>A major challenge in cross-language tools is scalability.
+                                        Parsing an entire Java and C/C++ codebase for every keystroke is 
+                                        not feasible due to high computational demands. 
+                                        To maintain high performance and quick 
+                                        feedback, CrossLink uses a persistent JNI Index.</p>
+                                </div>
+                                <ul>
+                                    <li><strong>Index Construction - </strong><p>Upon initialization, CrossLink scans all c and 
+                                        cpp files within the workspace. It extracts function 
+                                        names that adhere to the standard JNI naming 
+                                        convention (i.e., Java_PackageName_ClassName_MethodName).
+                                        These function signatures are mapped to their corresponding file paths in the JNI Index. This index is computed once and is only rebuilt when changes are detected in the C/C++ source files. These file changes are detected by File Watcher. File Watcher triggers re-analysis 
+                                        in the dependency analyzer and the constant analyzer.</p></li>
+                                    <li><strong>Lookup and Live Highlighting -</strong><p>To provide live feedback in the editor, CrossLink minimizes parsing overhead by scanning only the active Java file. The process follows two steps:</p>
+                                    <ul>
+                                        <li><b>(1) Native Scanning: </b><p>The tool scans the Java file, specifically looking for lines that include the native keyword. It captures the package, class, and method names to create the expected C++ function name.</p></li>
+                                        <li><b>(2) Index Query: </b><p>These computed names are checked against the pre-built JNI Index. If a match is found, the connection is noted, and the link is highlighted in green. If no match is found, the link gets highlighted in red, providing immediate visual feedback about the broken link.</p></li>
+                                    </ul>
+                                    </li>
+                                    
+                                </ul>
+                            </section>
                             <!-- Features -->
                             <section id="usage-section" class="doc-section">
                                 <h2 class="section-title">Features</h2>
 
                                 <h3>Dependency Visualization & Verification</h3>
                                 <ul>
-                                    <li>Visual file-level dependency graphs</li>
-                                    <li>JNI Link Report with method-level mappings</li>
+                                    <li><b>Dependency and JNI Link Graph: </b>The tool creates a visual graph of file-level dependencies. It clearly marks nodes where JNI implementations are missing. This gives developers a high-level view of the project’s binding status.</li>
+                                    <li><b>JNI Link Report: </b>While the graph shows file dependencies,the Link Report panel provides detailed, method-level dependencies in a table format. It lists every specific Java-to-C++ method link.</li>
                                 </ul>
 
                                 <h3>Interactive Navigation</h3>
                                 <ul>
-                                    <li>🟢 Green highlight for valid JNI links</li>
-                                    <li>🔴 Red highlight for missing JNI implementations</li>
-                                    <li>Cross-language navigation (Java → C++)</li>
+                                    <li><b>Live Link Highlighting: </b>As developers type, the tool highlights native method declarations in real-time (green for linked, red for broken). This prevents waiting for runtime UnsatisfiedLinkError exceptions. As explained in below code snippet.</li>
+                                    <ul>
+                                    <li>🟢 Green: Java method declaration present in some C/C++ file.</li>
+                                    <li>🔴 Red: Java method declaration Missing indicating broken link.</li>
+                                    </ul>
+                                    <li><b>Cross-language navigation (Java → C++): </b>Developers can click on a successfully linked Java native method to quickly jump to its corresponding C++ implementation definition. This simplifies code exploration. In below figure we can see Goto implementation option above the highlighted link.</li>   
                                 </ul>
-
+                                <img src="Code_green.png"
+         alt="Link Highlighting Example"
+         class="img-fluid"
+         style="max-width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
+    <p class="mt-3"><em>Figure: Link highlighting with option to jump to C++ implementation</em></p>
                                 <h3>Cross-Language Code Highlighting</h3>
                                 <ul>
                                     <li>Highlights <code>System.loadLibrary()</code> calls</li>
                                     <li>Platform-aware extension detection (.dll, .so, .dylib)</li>
-                                    <li>Hover information for library and native status</li>
+                                    <li>Hover information: Detailed information about library status and native method implementation when hovering over highlighted code</li>
+                                    <li>Color-coded status:
+                                        <ul>
+                                            <li>🟢 <b>Green:</b> Library exists with correct extension or native method has C++ implementation</li>
+                                            <li>🔴 <b>Red:</b> Library file is missing or native method implementation is missing</li>
+                                            <li>🔵 <b>Blue:</b> Library exists but has wrong extension for current platform</li>
+                                        </ul>
+                                    </li>
+                                    <li>Platform Detection: automatically detects OS and expects appropriate library extensions.
+                                        <ul>
+                                            <li>Windows: <code>.dll</code></li>
+                                            <li>Linux: <code>.so</code></li>
+                                            <li>macOS: <code>.dylib</code></li>
+                                        </ul>
+                                    </li>
                                 </ul>
+
 
                                 <h3>Constants Management</h3>
                                 <ul>
-                                    <li>Magic number detection</li>
-                                    <li>Context-aware naming suggestions</li>
-                                    <li>Centralized constant analysis panel</li>
+                                    <li><b>Constants analyzer:</b> Scans for constants across Java and C++ files</li>
+                                    <li><b>Naming suggestions:</b> Provides constant naming based on context and usage</li>
+                                    <li><b>Magic number identification:</b> Detects numbers that should be extracted as constants</li>
+                                    <li><b>Context-aware categorization:</b> Groups constants by type, file, or usage context</li>
                                 </ul>
 
                                 <h3>Interactive Dashboard</h3>
                                 <ul>
-                                    <li>Real-time dependency statistics</li>
-                                    <li>Search and filtering capabilities</li>
-                                    <li>Quick refactoring actions (Copy / Move)</li>
+                                    <li><b>Webview-based control panel:</b> UI for managing all features</li>
+                                    <li><b>Real-time statistics:</b> Shows dependency counts, connection metrics, and constants analysis</li>
+                                    <li><b>Search and filtering:</b> Advanced filtering capabilities for all data (or in simple terms a search button)</li>
+                                    <li><b>Quick actions:</b> Context menus for common refactoring operations (Copy or Move)</li>
                                 </ul>
                             </section>
 
@@ -154,22 +208,10 @@
                                     <li>C++ projects interfacing with Java</li>
                                 </ul>
                             </section>
-
-                            <!-- Getting Started -->
-                            <section id="function-workflow-section" class="doc-section">
-                                <h2 class="section-title">Getting Started</h2>
-                                <ol>
-                                    <li>Clone the repository</li>
-                                    <li>Open the project in VS Code</li>
-                                    <li>Press <strong>F5</strong> to launch Extension Host</li>
-                                    <li>Open any Java file from a JNI project</li>
-                                </ol>
-                            </section>
-
                             <!-- Example -->
                             <section id="feature-section" class="doc-section">
                                 <h2 class="section-title">Example</h2>
-<pre><code>
+<pre><code class="language-java">
 public class HelloJNI {
     static {
         System.loadLibrary("hello");
@@ -182,123 +224,27 @@ public class HelloJNI {
 </code></pre>
                             </section>
 
+                            <!-- Getting Started -->
+                            <section id="function-workflow-section" class="doc-section">
+                                <h2 class="section-title">Getting Started</h2>
+                                <ol>
+                                    <li>Clone the repository <pre><code>git clone https://github.com/yourusername/crosslink.git</code></pre></li>
+                                    <li>Open the project in VS Code</li>
+                                    <li>Press <strong>F5</strong> (or go to Run → Start Debugging) click on <strong>"Debug Anyway"</strong> if popup comes.</li>
+                                    <li>Open any Java file from a JNI project</li>
+                                </ol>
+                                For testing you can use this JNI repo <a href="https://community.opengroup.org/osdu/platform/domain-data-mgmt-services/seismic/open-vds">Open VDS</a>
+                            </section>
+
+                            
+
                             <!-- Tool Evaluation Section -->
 <section id="evaluation-section" class="doc-section">
     <h2 class="section-title">Tool Evaluation Study</h2>
+    <p>Here is the document which was shared to the participants before the task, It contains necessary information and task details.</p>
+    <object data="Evaluation.htm" width="100%" height="600px"></object>
 
-    <div class="section-block">
-        <h3>Participant Information</h3>
-        <p>
-            Thank you for helping us evaluate CrossLink. This study aims to understand
-            how developers comprehend and debug JNI-based cross-language systems,
-            both with and without tool support.
-        </p>
-    </div>
-
-    <div class="section-block">
-        <h3>What is JNI?</h3>
-        <p>
-            The Java Native Interface (JNI) is a programming framework that allows Java
-            code running in the JVM to call and be called by native applications written
-            in C or C++. It acts as a bridge between two different programming languages.
-        </p>
-        <p>
-            Developers use JNI for performance optimization, reusing legacy C/C++ libraries,
-            and accessing system-level or hardware-specific features not directly available in Java.
-        </p>
-    </div>
-
-    <div class="section-block">
-        <h3>How JNI Works</h3>
-        <p><strong>Java Declaration:</strong></p>
-<pre><code>
-public native int getBufferImpl(int size);
-</code></pre>
-
-        <p><strong>C++ Implementation Naming Convention:</strong></p>
-<pre><code>
-JNIEXPORT jint JNICALL
-Java_package_ClassName_getBufferImpl
-  (JNIEnv *env, jobject obj, jint size)
-{
-    // C++ implementation
-}
-</code></pre>
-
-        <p>
-            The naming format follows:
-            <strong>Java_PackageName_ClassName_MethodName</strong>.
-            Any mismatch in naming or parameters can break the link.
-        </p>
-    </div>
-
-    <div class="section-block">
-        <h3>Rationale for Tasks</h3>
-        <p>
-            JNI links can break due to refactoring, typos, parameter mismatches,
-            or merge conflicts. Without tooling, developers must:
-        </p>
-        <ol>
-            <li>Read the Java native method</li>
-            <li>Guess the C++ function name</li>
-            <li>Search the entire C++ codebase</li>
-            <li>Locate the correct file</li>
-            <li>Verify parameter matching</li>
-        </ol>
-        <p>
-            This manual context switching between Java and C++ is mentally taxing.
-            CrossLink simplifies this process into interactive navigation and
-            visual verification.
-        </p>
-    </div>
-
-    <div class="section-block">
-        <h3>Evaluation Tasks</h3>
-
-        <h4>Without Tool</h4>
-        <p><strong>Task 1:</strong> Fix a Broken JNI Link</p>
-        <p>
-            Identify and fix the broken native method linkage
-            in <code>VolumeDataPageAccessor.java</code>.
-        </p>
-
-        <p><strong>Task 2:</strong> Fix a Parameter Mismatch</p>
-        <p>
-            Identify and resolve the parameter mismatch
-            in <code>VolumeDataPage.java</code>.
-        </p>
-
-        <hr>
-
-        <h4>With CrossLink</h4>
-        <p><strong>Task 1:</strong> Fix a Broken JNI Link</p>
-        <p>
-            Identify and fix the JNI linkage issue
-            in <code>VDS.java</code>.
-        </p>
-
-        <p><strong>Task 2:</strong> Fix a Parameter Mismatch</p>
-        <p>
-            Identify and resolve the error
-            in <code>VDSError.java</code>.
-        </p>
-    </div>
-
-    <div class="section-block">
-        <h3>Feedback Form</h3>
-        <p>
-            Participants complete a Google Form including:
-        </p>
-        <ul>
-            <li>Task difficulty rating (with and without tool)</li>
-            <li>Confidence level rating</li>
-            <li>Frustration level rating</li>
-            <li>Most time-consuming activity</li>
-            <li>Most helpful CrossLink feature</li>
-            <li>Time spent searching vs fixing</li>
-        </ul>
-    </div>
-
+    
 </section>
 
                             <!-- Demo -->
